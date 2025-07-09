@@ -1,4 +1,5 @@
-import { CreatePlateCard } from "@/components/plate/create-plate-card";
+import { CreatePlate } from "@/components/create-plate";
+import { PlateDialog } from "@/components/plate-dialog";
 import { auth } from "@/server/auth";
 import Link from "next/link";
 
@@ -18,7 +19,7 @@ export default async function Home({
       <p className="text-muted-foreground mb-4 text-center text-sm">
         Analyze your food intake with AI.
       </p>
-      <CreatePlateCard className="w-full max-w-xl" />
+      <CreatePlate className="w-full max-w-xl" />
       <p className="text-muted-foreground text-sm">
         See how it works on{" "}
         <Link
@@ -28,6 +29,7 @@ export default async function Home({
           Github
         </Link>
       </p>
+      <PlateDialog />
     </main>
   );
 }

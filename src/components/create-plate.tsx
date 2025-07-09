@@ -24,17 +24,22 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
-import { convertFileToBase64 } from "@/lib/utils";
-
+import { cn, convertFileToBase64 } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
+import { useUrlState } from "@/hooks/use-url-state";
 const formSchema = z.object({
   description: z.string().optional(),
   image: z.instanceof(File, { message: "A photo of your plate is required" }),
 });
 
-interface CreatePlateCardProps extends React.ComponentProps<typeof Card> {}
-export function CreatePlateCard({ ...props }: CreatePlateCardProps) {
+interface CreatePlateProps extends React.ComponentProps<typeof Card> {}
+export function CreatePlate({ className, ...props }: CreatePlateProps) {
+  const [_, setPlateId] = useUrlState();
   const { mutateAsync: createPlate, isPending } =
     api.plate.create.useMutation();
+
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,24 +50,20 @@ export function CreatePlateCard({ ...props }: CreatePlateCardProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const base64Image = await convertFileToBase64(values.image);
-      await createPlate({
-        image: base64Image,
+      const { id } = await createPlate({
+        image: await convertFileToBase64(values.image),
         description: values.description,
       });
+
+      setPlateId(id);
     } catch (error) {
       toast.error("Failed to create plate");
     }
   }
 
   return (
-    <Card {...props}>
-      <CardHeader>
-        <CardTitle>Meeting Notes</CardTitle>
-        <CardDescription>
-          Transcript from the meeting with the client.
-        </CardDescription>
-      </CardHeader>
+    <Card className={cn("relative", className)} {...props}>
+      <LoadingOverlay show={isPending} />
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
