@@ -15,8 +15,8 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-interface LoginDialogProps extends React.ComponentProps<typeof Button> {}
-export function LoginDialog({ ...props }: LoginDialogProps) {
+interface LoginProps extends React.ComponentProps<typeof Button> {}
+export function Login({ ...props }: LoginProps) {
   const [loading, setLoading] = useState(false);
 
   async function handleLogin(provider: "google" | "github") {

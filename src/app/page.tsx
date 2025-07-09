@@ -1,5 +1,6 @@
 import { CreatePlate } from "@/components/create-plate";
-import { PlateDialog } from "@/components/plate-dialog";
+import { Login } from "@/components/global/login";
+import { PlateDialog } from "@/components/plate-dialog/plate-dialog";
 import { auth } from "@/server/auth";
 import Link from "next/link";
 
@@ -9,7 +10,6 @@ export default async function Home({
   searchParams: Promise<{ share?: string }>;
 }) {
   const session = await auth();
-  const { share } = await searchParams;
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-3 p-4">
@@ -19,7 +19,11 @@ export default async function Home({
       <p className="text-muted-foreground mb-4 text-center text-sm">
         Analyze your food intake with AI.
       </p>
-      <CreatePlate className="w-full max-w-xl" />
+      {session ? (
+        <CreatePlate className="w-full max-w-xl" />
+      ) : (
+        <Login>Login</Login>
+      )}
       <p className="text-muted-foreground text-sm">
         See how it works on{" "}
         <Link
