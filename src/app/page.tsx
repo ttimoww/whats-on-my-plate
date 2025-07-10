@@ -17,7 +17,7 @@ export default async function Home({
         What&apos;s On My Plate 🍔
       </h1>
       <p className="text-muted-foreground mb-4 text-center text-sm">
-        Analyze your food intake with AI.
+        Know what&apos;s in your food by taking a picture of your plate.
       </p>
       {session ? (
         <CreatePlate className="w-full max-w-xl" />

@@ -1,19 +1,44 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useChat } from "@ai-sdk/react";
 import { SendIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import type { Plate } from "@prisma/client";
+import { useEffect, useRef } from "react";
 
-interface ChatProps extends React.HTMLAttributes<HTMLDivElement> {}
-export function Chat({ className, ...props }: ChatProps) {
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
-    api: "/api/chat",
-  });
+interface ChatProps extends React.HTMLAttributes<HTMLDivElement> {
+  plate: Plate;
+}
+export function Chat({ className, plate, ...props }: ChatProps) {
+  const startedRef = useRef(false);
+
+  const { messages, input, handleInputChange, handleSubmit, status, reload } =
+    useChat({
+      api: `/api/chat`,
+      body: {
+        plateId: plate.id,
+      },
+      initialMessages: [
+        {
+          id: "1",
+          role: "user",
+          content: "What's on my plate?", // This message is overwritten serverside
+        },
+      ],
+    });
+
+  useEffect(() => {
+    if (startedRef.current) return;
+
+    startedRef.current = true;
+    reload();
+  }, [reload]);
 
   return (
     <div className={cn("flex h-full flex-col p-4", className)} {...props}>
+      <p>{status}</p>
       <div className="mb-auto">
         {messages.map((m) => (
           <div key={m.id}>
@@ -23,22 +48,11 @@ export function Chat({ className, ...props }: ChatProps) {
         ))}
       </div>
 
-      <form
-        className="flex items-end gap-3"
-        onSubmit={(e) => {
-          handleSubmit(e, {
-            data: {
-              imageUrl:
-                "https://fastly.picsum.photos/id/405/500/500.jpg?hmac=kALs-x5LPK5UEWmXyaLbtUhr2eBuZotJlNJdzm0wlXk",
-            },
-          });
-        }}
-      >
-        <Textarea
+      <form className="flex items-end gap-3" onSubmit={handleSubmit}>
+        <Input
           placeholder="Message"
           value={input}
           onChange={handleInputChange}
-          rows={1}
           className="min-h-[44px] resize-none rounded-2xl pe-12"
         />
         <Button

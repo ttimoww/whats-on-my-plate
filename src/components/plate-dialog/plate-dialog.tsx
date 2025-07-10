@@ -8,6 +8,7 @@ import { useUrlState } from "@/hooks/use-url-state";
 import { api } from "@/trpc/react";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface PlateDialogProps
   extends React.ComponentPropsWithoutRef<typeof Dialog> {}
@@ -35,7 +36,7 @@ function Content({ plateId }: { plateId: number }) {
     return <p>Error</p>;
   }
 
-  if (isLoading) {
+  if (isLoading || !data) {
     return <LoadingOverlay show />;
   }
 
@@ -46,13 +47,13 @@ function Content({ plateId }: { plateId: number }) {
         <div className="relative grid grid-cols-8 gap-4 p-4">
           <Card className="col-span-5 py-2">
             <CardContent className="px-2">
-              <p className="text-muted-foreground text-sm">{data?.id}</p>
+              <Image src={data.imageUrl} alt="Plate" width={300} height={300} />
             </CardContent>
           </Card>
         </div>
       </div>
       <div className="col-span-1">
-        <Chat />
+        <Chat plate={data} />
       </div>
     </div>
   );

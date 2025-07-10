@@ -84,9 +84,6 @@ export function CreatePlate({ className, ...props }: CreatePlateProps) {
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>
-                    The clearer the image, the better the analysis.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -96,16 +93,10 @@ export function CreatePlate({ className, ...props }: CreatePlateProps) {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Additional information (optional)</FormLabel>
+                  <FormLabel>Description (optional)</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Something with rice and chicken"
-                      {...field}
-                    />
+                    <Textarea placeholder="Enter description" {...field} />
                   </FormControl>
-                  <FormDescription>
-                    This can improve the calculation of macronutrients.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

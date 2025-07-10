@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -39,10 +40,14 @@ export function Login({ ...props }: LoginProps) {
         <Button {...props} />
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader>
+        <DialogHeader className="mb-4">
           <DialogTitle>Login</DialogTitle>
+          <DialogDescription>
+            I&apos;ll <span className="font-bold">never</span> contact you, just
+            making sure this app is not abused
+          </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-2 md:grid-cols-2">
+        <div className="grid gap-4">
           <Button
             variant="outline"
             onClick={() => handleLogin("google")}
@@ -58,10 +63,6 @@ export function Login({ ...props }: LoginProps) {
             <Github className="size-4" /> Sign in with Github
           </Button>
         </div>
-        <p className="text-muted-foreground text-sm">
-          I&apos;ll <span className="font-bold">never</span> contact you, just
-          making sure this app is not abused
-        </p>
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
