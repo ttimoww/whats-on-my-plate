@@ -7,13 +7,18 @@ import z from 'zod';
 
 export const maxDuration = 60;
 
-const imageDescriptionSchema = z.object({ description: z.string() })
+const foodDescriptionSchema = z.object({
+    kcal: z.number().describe('The number of kilocalories in the food'),
+    protein: z.number().describe('The number of grams of protein in the food (in grams)'),
+    carbs: z.number().describe('The number of grams of carbs in the food (in grams)'),
+    fat: z.number().describe('The number of grams of fat in the food (in grams)'),
+})
 
 const tools = {
-    describeImage: tool({
-        description: "Describe the image",
-        parameters: imageDescriptionSchema,
-        execute: async (data: z.infer<typeof imageDescriptionSchema>) => {
+    describeFood: tool({
+        description: "Describe the food in the image",
+        parameters: foodDescriptionSchema,
+        execute: async (data: z.infer<typeof foodDescriptionSchema>) => {
             console.log('CALLED TOOLD: ', data)
             return data;
         },
@@ -49,7 +54,7 @@ export async function POST(req: NextRequest) {
         {
             role: 'user',
             content: [
-                { type: 'text', text: 'What is on my plate, make sure to call the describeImage tool' },
+                { type: 'text', text: 'What is on my plate, make sure to call the describeFood tool' },
                 { type: 'image', image: new URL(plate.imageUrl) },
             ],
         },
@@ -59,7 +64,7 @@ export async function POST(req: NextRequest) {
     // Call the language model
     const result = streamText({
         model: openai('gpt-4o'),
-        system: "You are a helpful assistant that can describe images. When a user uploads an image, you always describe the image by calling the 'describeImage' tool.",
+        system: PROMPT,
         messages,
         tools,
         maxSteps: 10,
@@ -71,3 +76,9 @@ export async function POST(req: NextRequest) {
     // Respond with the stream
     return result.toDataStreamResponse();
 }
+
+const PROMPT = `
+You are a helpful assistant that can describe images. 
+When a user uploads an image, you always describe the image by calling the 'describeFood' tool. 
+Whenever the user provides more information about their food during the conversation, update the food by calling the 'describeFood' tool if needed. 
+`

@@ -7,6 +7,12 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import type { Plate } from "@prisma/client";
 import { useEffect, useRef } from "react";
+import {
+  ChatMessage,
+  ChatMessageContent,
+  ChatList,
+} from "@/components/ui/chat-message";
+import type { Message as TMessage, UIMessage } from "ai";
 
 interface ChatProps extends React.HTMLAttributes<HTMLDivElement> {
   plate: Plate;
@@ -37,16 +43,18 @@ export function Chat({ className, plate, ...props }: ChatProps) {
   }, [reload]);
 
   return (
-    <div className={cn("flex h-full flex-col p-4", className)} {...props}>
-      <p>{status}</p>
-      <div className="mb-auto">
-        {messages.map((m) => (
-          <div key={m.id}>
-            {m.role === "user" ? "User: " : "AI: "}
-            {m.content}
-          </div>
+    <div
+      className={cn(
+        "flex h-full max-h-full flex-col gap-2 border border-blue-400 p-4",
+        className,
+      )}
+      {...props}
+    >
+      <ChatList className="flex-1 overflow-y-auto border border-red-400">
+        {messages.map((message) => (
+          <Message key={message.id} message={message} />
         ))}
-      </div>
+      </ChatList>
 
       <form className="flex items-end gap-3" onSubmit={handleSubmit}>
         <Input
@@ -65,4 +73,39 @@ export function Chat({ className, plate, ...props }: ChatProps) {
       </form>
     </div>
   );
+}
+
+function Message({ message }: { message: TMessage }) {
+  if (message.role === "user") {
+    return (
+      <ChatMessage variant="user" status="sent">
+        <ChatMessageContent className="text-white">
+          {message.content}
+        </ChatMessageContent>
+      </ChatMessage>
+    );
+  }
+
+  if (message.role === "assistant") {
+    return (
+      <ChatMessage variant="assistant" status="sent">
+        <div className="space-y-2">
+          {message.parts?.map((part, i) => {
+            const key = `${message.id}-${i}`;
+            return <MessagePart key={key} messagePart={part} />;
+          })}
+        </div>
+      </ChatMessage>
+    );
+  }
+}
+
+interface MessagePartProps extends React.HTMLAttributes<HTMLDivElement> {
+  messagePart: UIMessage["parts"][number];
+}
+
+function MessagePart({ messagePart, className, ...props }: MessagePartProps) {
+  if (messagePart.type === "text") {
+    return <ChatMessageContent>{messagePart.text}</ChatMessageContent>;
+  }
 }
