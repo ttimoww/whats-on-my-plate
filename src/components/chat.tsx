@@ -13,40 +13,31 @@ import {
   ChatList,
 } from "@/components/ui/chat-message";
 import type { Message as TMessage, UIMessage } from "ai";
+import Image from "next/image";
+import { MemoizedMarkdown } from "@/components/memoized-markdown";
+import { usePlateDialog } from "@/providers/plate-dialog-provider";
 
 interface ChatProps extends React.HTMLAttributes<HTMLDivElement> {
   plate: Plate;
 }
 export function Chat({ className, plate, ...props }: ChatProps) {
-  const startedRef = useRef(false);
+  const chatStartedRef = useRef(false);
+  const { chat } = usePlateDialog();
 
-  const { messages, input, handleInputChange, handleSubmit, status, reload } =
-    useChat({
-      api: `/api/chat`,
-      body: {
-        plateId: plate.id,
-      },
-      initialMessages: [
-        {
-          id: "1",
-          role: "user",
-          content: "What's on my plate?", // This message is overwritten serverside
-        },
-      ],
-    });
+  const { messages, input, handleInputChange, handleSubmit, reload } = chat;
 
   useEffect(() => {
-    if (startedRef.current) return;
-
-    startedRef.current = true;
+    if (chatStartedRef.current) return;
+    chatStartedRef.current = true;
     reload();
   }, [reload]);
 
   return (
     <div className={cn("flex flex-col", className)} {...props}>
       <div className="flex-1 overflow-y-auto">
-        <div className="max-h-0 p-2">
-          <ChatList>
+        <div className="max-h-0">
+          <ChatList className="p-6">
+            <MessageWithPlateImage imageUrl={plate.imageUrl} />
             {messages.map((message) => (
               <Message key={message.id} message={message} />
             ))}
@@ -75,18 +66,41 @@ export function Chat({ className, plate, ...props }: ChatProps) {
   );
 }
 
+function MessageWithPlateImage({ imageUrl }: { imageUrl: string }) {
+  return (
+    <ChatMessage variant="user" status="sent">
+      <ChatMessageContent className="text-white">
+        <Image
+          src={imageUrl}
+          alt="Plate"
+          width={200}
+          height={200}
+          className="rounded-lg"
+        />
+      </ChatMessageContent>
+    </ChatMessage>
+  );
+}
+
 function Message({ message }: { message: TMessage }) {
   if (message.role === "user") {
     return (
       <ChatMessage variant="user" status="sent">
         <ChatMessageContent className="text-white">
-          {message.content}
+          <MemoizedMarkdown id={message.id} content={message.content} />
         </ChatMessageContent>
       </ChatMessage>
     );
   }
 
   if (message.role === "assistant") {
+    return (
+      <ChatMessage variant="assistant" status="sent">
+        <ChatMessageContent>
+          <MemoizedMarkdown id={message.id} content={message.content} />
+        </ChatMessageContent>
+      </ChatMessage>
+    );
     return (
       <ChatMessage variant="assistant" status="sent">
         <div className="space-y-2">

@@ -7,10 +7,12 @@ import { Chat } from "@/components/chat";
 import { useUrlState } from "@/hooks/use-url-state";
 import { api } from "@/trpc/react";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Flame, Target, Heart, ChefHat, Tag } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
+import {
+  PlateDialogProvider,
+  usePlateDialog,
+} from "@/providers/plate-dialog-provider";
 
 interface PlateDialogProps
   extends React.ComponentPropsWithoutRef<typeof Dialog> {}
@@ -21,7 +23,7 @@ export function PlateDialog({ ...props }: PlateDialogProps) {
 
   return (
     <Dialog open={hasPlateId} onOpenChange={() => setPlateId(null)} {...props}>
-      <DialogContent className="h-[70vh] p-0 sm:max-w-[calc(100%-2rem)] lg:max-h-[600px] xl:max-w-6xl">
+      <DialogContent className="h-[70vh] overflow-hidden p-0 sm:max-w-[calc(100%-2rem)] lg:max-h-[600px] xl:max-w-6xl">
         <DialogTitle className="sr-only">Plate {plateId}</DialogTitle>
         {hasPlateId && <Content plateId={plateId} />}
       </DialogContent>
@@ -42,68 +44,36 @@ function Content({ plateId }: { plateId: number }) {
     return <LoadingOverlay show />;
   }
 
-  // return (
-  //   <div className="grid h-full border border-green-200 lg:grid-cols-2">
-  //     <div className="border border-blue-500">left</div>
-  //     <div className="flex h-[500px] flex-col border border-red-500">
-  //       <p>plate</p>
-  //       <div className="flex-1 overflow-y-scroll">
-  //         <div className="bg-primary h-[700px] w-10"></div>
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
-
-  // Mock nutrition data - in a real app, this would come from the AI analysis
-  const nutritionData = {
-    calories: 520,
-    macros: {
-      protein: 28,
-      carbs: 45,
-      fat: 18,
-    },
-    healthScore: 8.2,
-    ingredients: [
-      "Bow-tie pasta",
-      "Tomato sauce",
-      "Fresh broccoli",
-      "White fish fillet",
-      "Olive oil",
-      "Garlic",
-      "Herbs & spices",
-    ],
-    dietaryTags: [
-      { name: "High Protein", color: "bg-red-100 text-red-700" },
-      { name: "Pescatarian", color: "bg-blue-100 text-blue-700" },
-      { name: "Mediterranean", color: "bg-green-100 text-green-700" },
-      { name: "Heart Healthy", color: "bg-pink-100 text-pink-700" },
-    ],
-  };
-
   return (
-    <div className="flex h-full flex-col lg:flex-row">
-      <div className="border-border relative bg-gray-100/50 max-lg:border-b lg:border-r">
-        <DottedGrid />
-        <div className="relative grid grid-cols-2 gap-4 p-6">
-          <div className="flex flex-col gap-4">
-            <CaloriesCard calories={nutritionData.calories} />
-            <HealthScoreCard healthScore={nutritionData.healthScore} />
-          </div>
-          <div className="flex flex-col gap-4">
-            <MacrosCard macros={nutritionData.macros} />
+    <PlateDialogProvider plate={data}>
+      <div className="flex h-full flex-col lg:flex-row">
+        <div className="border-border relative flex-1 bg-gray-100/50 max-lg:border-b lg:border-r">
+          <DottedGrid />
+          <div className="relative grid grid-cols-2 gap-4 p-6">
+            <div className="flex flex-col gap-4">
+              <CaloriesCard />
+              <HealthScoreCard />
+            </div>
+            <div className="flex flex-col gap-4">
+              <MacrosCard />
+            </div>
           </div>
         </div>
+        <Chat className="flex-2" plate={data} />
       </div>
-      <Chat className="flex-1" plate={data} />
-    </div>
+    </PlateDialogProvider>
   );
 }
 
 interface CaloriesCardProps
-  extends React.ComponentPropsWithoutRef<typeof Card> {
-  calories: number;
-}
-function CaloriesCard({ calories, ...props }: CaloriesCardProps) {
+  extends React.ComponentPropsWithoutRef<typeof Card> {}
+function CaloriesCard({ ...props }: CaloriesCardProps) {
+  const { nutritionalInfo } = usePlateDialog();
+
+  if (!nutritionalInfo) {
+    return null;
+  }
+
   return (
     <Card className="p-4" {...props}>
       <CardContent className="p-0">
@@ -111,21 +81,21 @@ function CaloriesCard({ calories, ...props }: CaloriesCardProps) {
           <Flame className="h-5 w-5 text-orange-500" />
           <p className="text-base font-medium">Calories</p>
         </div>
-        <div className="text-2xl font-bold">{calories}</div>
+        <div className="text-2xl font-bold">{nutritionalInfo.kcal}</div>
         <p className="text-muted-foreground text-sm">kcal</p>
       </CardContent>
     </Card>
   );
 }
 
-interface MacrosCardProps extends React.ComponentPropsWithoutRef<typeof Card> {
-  macros: {
-    protein: number;
-    carbs: number;
-    fat: number;
-  };
-}
-function MacrosCard({ macros, ...props }: MacrosCardProps) {
+interface MacrosCardProps extends React.ComponentPropsWithoutRef<typeof Card> {}
+function MacrosCard({ ...props }: MacrosCardProps) {
+  const { nutritionalInfo } = usePlateDialog();
+
+  if (!nutritionalInfo) {
+    return null;
+  }
+
   return (
     <Card className="p-4" {...props}>
       <CardContent className="p-0">
@@ -136,19 +106,19 @@ function MacrosCard({ macros, ...props }: MacrosCardProps) {
         <div className="grid grid-cols-3 gap-3 text-center">
           <div>
             <div className="text-lg font-semibold text-red-600">
-              {macros.protein}g
+              {nutritionalInfo.protein}g
             </div>
             <p className="text-muted-foreground text-sm">Protein</p>
           </div>
           <div>
             <div className="text-lg font-semibold text-amber-600">
-              {macros.carbs}g
+              {nutritionalInfo.carbs}g
             </div>
             <p className="text-muted-foreground text-sm">Carbs</p>
           </div>
           <div>
             <div className="text-lg font-semibold text-purple-600">
-              {macros.fat}g
+              {nutritionalInfo.fat}g
             </div>
             <p className="text-muted-foreground text-sm">Fat</p>
           </div>
@@ -159,10 +129,14 @@ function MacrosCard({ macros, ...props }: MacrosCardProps) {
 }
 
 interface HealthScoreCardProps
-  extends React.ComponentPropsWithoutRef<typeof Card> {
-  healthScore: number;
-}
-function HealthScoreCard({ healthScore, ...props }: HealthScoreCardProps) {
+  extends React.ComponentPropsWithoutRef<typeof Card> {}
+function HealthScoreCard({ ...props }: HealthScoreCardProps) {
+  const { healthScore } = usePlateDialog();
+
+  if (!healthScore) {
+    return null;
+  }
+
   const getScoreLabel = function (score: number) {
     if (score >= 8) return "Excellent";
     if (score >= 6) return "Good";
@@ -178,7 +152,9 @@ function HealthScoreCard({ healthScore, ...props }: HealthScoreCardProps) {
           <p className="text-base font-medium">Health Score</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="text-2xl font-bold text-green-600">{healthScore}</div>
+          <div className="text-2xl font-bold text-green-600">
+            {healthScore.healthScore}
+          </div>
           <div className="text-muted-foreground text-sm">
             <div>/10</div>
           </div>
@@ -186,11 +162,11 @@ function HealthScoreCard({ healthScore, ...props }: HealthScoreCardProps) {
         <div className="mt-3 h-2 w-full rounded-full bg-gray-200">
           <div
             className="h-2 rounded-full bg-green-500"
-            style={{ width: `${(healthScore / 10) * 100}%` }}
+            style={{ width: `${(healthScore.healthScore / 10) * 100}%` }}
           />
         </div>
         <p className="text-muted-foreground mt-2 text-sm">
-          {getScoreLabel(healthScore)}
+          {getScoreLabel(healthScore.healthScore)}
         </p>
       </CardContent>
     </Card>

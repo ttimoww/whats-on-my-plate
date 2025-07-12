@@ -137,9 +137,13 @@ ChatMessage.displayName = "ChatMessage";
 
 const ChatMessageContent = React.forwardRef<
   HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
+  React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <p ref={ref} className={cn("text-sm text-gray-800", className)} {...props} />
+  <div
+    ref={ref}
+    className={cn("prose space-y-2 text-sm text-gray-800", className)}
+    {...props}
+  />
 ));
 ChatMessageContent.displayName = "ChatMessageContent";
 
