@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useChat } from "@ai-sdk/react";
-import { SendIcon } from "lucide-react";
+import { CpuIcon, Loader2, SendIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import type { Plate } from "@prisma/client";
@@ -16,6 +16,7 @@ import type { Message as TMessage, UIMessage } from "ai";
 import Image from "next/image";
 import { MemoizedMarkdown } from "@/components/memoized-markdown";
 import { usePlateDialog } from "@/providers/plate-dialog-provider";
+import type { ToolName } from "@/app/api/chat/route";
 
 interface ChatProps extends React.HTMLAttributes<HTMLDivElement> {
   plate: Plate;
@@ -93,33 +94,50 @@ function Message({ message }: { message: TMessage }) {
     );
   }
 
-  if (message.role === "assistant") {
+  return (
+    <ChatMessage variant="assistant" status="sent">
+      <div className="space-y-2">
+        {message.parts?.map((part, i) => {
+          const key = `${message.id}-${i}`;
+          return (
+            <MessagePart key={key} messagePart={part} messageId={message.id} />
+          );
+        })}
+      </div>
+    </ChatMessage>
+  );
+}
+
+interface MessagePartProps {
+  messagePart: UIMessage["parts"][number];
+  messageId: string;
+}
+function MessagePart({ messagePart, messageId }: MessagePartProps) {
+  if (messagePart.type === "text") {
     return (
-      <ChatMessage variant="assistant" status="sent">
-        <ChatMessageContent>
-          <MemoizedMarkdown id={message.id} content={message.content} />
-        </ChatMessageContent>
-      </ChatMessage>
-    );
-    return (
-      <ChatMessage variant="assistant" status="sent">
-        <div className="space-y-2">
-          {message.parts?.map((part, i) => {
-            const key = `${message.id}-${i}`;
-            return <MessagePart key={key} messagePart={part} />;
-          })}
-        </div>
-      </ChatMessage>
+      <ChatMessageContent>
+        <MemoizedMarkdown id={messageId} content={messagePart.text} />
+      </ChatMessageContent>
     );
   }
-}
 
-interface MessagePartProps extends React.HTMLAttributes<HTMLDivElement> {
-  messagePart: UIMessage["parts"][number];
-}
+  if (messagePart.type === "tool-invocation") {
+    const toolCallId = messagePart.toolInvocation.toolCallId;
 
-function MessagePart({ messagePart, className, ...props }: MessagePartProps) {
-  if (messagePart.type === "text") {
-    return <ChatMessageContent>{messagePart.text}</ChatMessageContent>;
+    // Other tools
+    const toolName = messagePart.toolInvocation.toolName as ToolName;
+    if (messagePart.toolInvocation.state === "call") {
+      return (
+        <p className="bg-muted/70 text-muted-foreground w-fit rounded-full px-2 py-1 text-[10px] font-medium">
+          <Loader2 className="inline size-3 animate-spin" /> {toolName}
+        </p>
+      );
+    }
+
+    return (
+      <p className="bg-muted/70 text-muted-foreground w-fit rounded-full px-2 py-1 text-[10px] font-medium">
+        <CpuIcon className="inline size-3" /> {toolName}
+      </p>
+    );
   }
 }

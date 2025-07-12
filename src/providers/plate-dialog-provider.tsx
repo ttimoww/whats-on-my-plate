@@ -1,6 +1,5 @@
 "use client";
 
-import { api } from "@/trpc/react";
 import { useChat } from "@ai-sdk/react";
 import type { Plate } from "@prisma/client";
 import { createContext, useContext, useState } from "react";

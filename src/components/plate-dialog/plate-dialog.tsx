@@ -13,6 +13,7 @@ import {
   PlateDialogProvider,
   usePlateDialog,
 } from "@/providers/plate-dialog-provider";
+import { motion, AnimatePresence } from "motion/react";
 
 interface PlateDialogProps
   extends React.ComponentPropsWithoutRef<typeof Dialog> {}
@@ -47,7 +48,7 @@ function Content({ plateId }: { plateId: number }) {
   return (
     <PlateDialogProvider plate={data}>
       <div className="flex h-full flex-col lg:flex-row">
-        <div className="border-border relative flex-1 bg-gray-100/50 max-lg:border-b lg:border-r">
+        <div className="border-border relative flex-4 bg-gray-100/50 max-lg:border-b lg:border-r">
           <DottedGrid />
           <div className="relative grid grid-cols-2 gap-4 p-6">
             <div className="flex flex-col gap-4">
@@ -59,9 +60,24 @@ function Content({ plateId }: { plateId: number }) {
             </div>
           </div>
         </div>
-        <Chat className="flex-2" plate={data} />
+        <Chat className="flex-6" plate={data} />
       </div>
     </PlateDialogProvider>
+  );
+}
+
+function AnimateIn({ children }: { children: React.ReactNode }) {
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.5 }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
@@ -75,16 +91,18 @@ function CaloriesCard({ ...props }: CaloriesCardProps) {
   }
 
   return (
-    <Card className="p-4" {...props}>
-      <CardContent className="p-0">
-        <div className="mb-2 flex items-center gap-2">
-          <Flame className="h-5 w-5 text-orange-500" />
-          <p className="text-base font-medium">Calories</p>
-        </div>
-        <div className="text-2xl font-bold">{nutritionalInfo.kcal}</div>
-        <p className="text-muted-foreground text-sm">kcal</p>
-      </CardContent>
-    </Card>
+    <AnimateIn>
+      <Card className="p-4" {...props}>
+        <CardContent className="p-0">
+          <div className="mb-2 flex items-center gap-2">
+            <Flame className="h-5 w-5 text-orange-500" />
+            <p className="text-base font-medium">Calories</p>
+          </div>
+          <div className="text-2xl font-bold">{nutritionalInfo.kcal}</div>
+          <p className="text-muted-foreground text-sm">kcal</p>
+        </CardContent>
+      </Card>
+    </AnimateIn>
   );
 }
 
@@ -97,34 +115,36 @@ function MacrosCard({ ...props }: MacrosCardProps) {
   }
 
   return (
-    <Card className="p-4" {...props}>
-      <CardContent className="p-0">
-        <div className="mb-3 flex items-center gap-2">
-          <Target className="h-5 w-5 text-blue-500" />
-          <p className="text-base font-medium">Macros</p>
-        </div>
-        <div className="grid grid-cols-3 gap-3 text-center">
-          <div>
-            <div className="text-lg font-semibold text-red-600">
-              {nutritionalInfo.protein}g
-            </div>
-            <p className="text-muted-foreground text-sm">Protein</p>
+    <AnimateIn>
+      <Card className="p-4" {...props}>
+        <CardContent className="p-0">
+          <div className="mb-3 flex items-center gap-2">
+            <Target className="h-5 w-5 text-blue-500" />
+            <p className="text-base font-medium">Macros</p>
           </div>
-          <div>
-            <div className="text-lg font-semibold text-amber-600">
-              {nutritionalInfo.carbs}g
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div>
+              <div className="text-lg font-semibold text-red-600">
+                {nutritionalInfo.protein}g
+              </div>
+              <p className="text-muted-foreground text-sm">Protein</p>
             </div>
-            <p className="text-muted-foreground text-sm">Carbs</p>
-          </div>
-          <div>
-            <div className="text-lg font-semibold text-purple-600">
-              {nutritionalInfo.fat}g
+            <div>
+              <div className="text-lg font-semibold text-amber-600">
+                {nutritionalInfo.carbs}g
+              </div>
+              <p className="text-muted-foreground text-sm">Carbs</p>
             </div>
-            <p className="text-muted-foreground text-sm">Fat</p>
+            <div>
+              <div className="text-lg font-semibold text-purple-600">
+                {nutritionalInfo.fat}g
+              </div>
+              <p className="text-muted-foreground text-sm">Fat</p>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </AnimateIn>
   );
 }
 
@@ -145,31 +165,33 @@ function HealthScoreCard({ ...props }: HealthScoreCardProps) {
   };
 
   return (
-    <Card className="p-4" {...props}>
-      <CardContent className="p-0">
-        <div className="mb-3 flex items-center gap-2">
-          <Heart className="h-5 w-5 text-green-500" />
-          <p className="text-base font-medium">Health Score</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="text-2xl font-bold text-green-600">
-            {healthScore.healthScore}
+    <AnimateIn>
+      <Card className="p-4" {...props}>
+        <CardContent className="p-0">
+          <div className="mb-3 flex items-center gap-2">
+            <Heart className="h-5 w-5 text-green-500" />
+            <p className="text-base font-medium">Health Score</p>
           </div>
-          <div className="text-muted-foreground text-sm">
-            <div>/10</div>
+          <div className="flex items-center gap-3">
+            <div className="text-2xl font-bold text-green-600">
+              {healthScore.healthScore}
+            </div>
+            <div className="text-muted-foreground text-sm">
+              <div>/10</div>
+            </div>
           </div>
-        </div>
-        <div className="mt-3 h-2 w-full rounded-full bg-gray-200">
-          <div
-            className="h-2 rounded-full bg-green-500"
-            style={{ width: `${(healthScore.healthScore / 10) * 100}%` }}
-          />
-        </div>
-        <p className="text-muted-foreground mt-2 text-sm">
-          {getScoreLabel(healthScore.healthScore)}
-        </p>
-      </CardContent>
-    </Card>
+          <div className="mt-3 h-2 w-full rounded-full bg-gray-200">
+            <div
+              className="h-2 rounded-full bg-green-500"
+              style={{ width: `${(healthScore.healthScore / 10) * 100}%` }}
+            />
+          </div>
+          <p className="text-muted-foreground mt-2 text-sm">
+            {getScoreLabel(healthScore.healthScore)}
+          </p>
+        </CardContent>
+      </Card>
+    </AnimateIn>
   );
 }
 
