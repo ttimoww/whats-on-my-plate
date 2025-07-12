@@ -1,5 +1,5 @@
-import { parseAsInteger, useQueryState } from 'nuqs'
+import { parseAsInteger, useQueryState } from "nuqs";
 
 export function useUrlState() {
-    return useQueryState('plate', parseAsInteger)
+  return useQueryState("plate", parseAsInteger);
 }

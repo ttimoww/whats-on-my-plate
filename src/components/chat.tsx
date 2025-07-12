@@ -43,20 +43,20 @@ export function Chat({ className, plate, ...props }: ChatProps) {
   }, [reload]);
 
   return (
-    <div
-      className={cn(
-        "flex h-full max-h-full flex-col gap-2 border border-blue-400 p-4",
-        className,
-      )}
-      {...props}
-    >
-      <ChatList className="flex-1 overflow-y-auto border border-red-400">
-        {messages.map((message) => (
-          <Message key={message.id} message={message} />
-        ))}
-      </ChatList>
-
-      <form className="flex items-end gap-3" onSubmit={handleSubmit}>
+    <div className={cn("flex flex-col", className)} {...props}>
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-h-0 p-2">
+          <ChatList>
+            {messages.map((message) => (
+              <Message key={message.id} message={message} />
+            ))}
+          </ChatList>
+        </div>
+      </div>
+      <form
+        className="flex items-end gap-3 border-t p-2"
+        onSubmit={handleSubmit}
+      >
         <Input
           placeholder="Message"
           value={input}

@@ -6,15 +6,15 @@ import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
-    images: {
-        remotePatterns: [
-            {
-                protocol: 'https',
-                hostname: 'res.cloudinary.com',
-                pathname: '/wallthing/image/**'
-            }
-        ]
-    }
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/wallthing/image/**",
+      },
+    ],
+  },
 };
 
 export default config;

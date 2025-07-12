@@ -1,8 +1,8 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function convertFileToBase64(file: File): Promise<string> {
@@ -16,14 +16,13 @@ export function convertFileToBase64(file: File): Promise<string> {
 
 export function convertBase64ToBuffer(base64String: string): Buffer {
   // Remove the data URL prefix if present (e.g., "data:image/jpeg;base64,")
-  const base64Data = base64String.includes(',')
-    ? base64String.split(',')[1] || base64String
+  const base64Data = base64String.includes(",")
+    ? base64String.split(",")[1] || base64String
     : base64String;
 
   if (!base64Data) {
-    throw new Error('Invalid base64 string provided');
+    throw new Error("Invalid base64 string provided");
   }
 
-  return Buffer.from(base64Data, 'base64');
+  return Buffer.from(base64Data, "base64");
 }
-

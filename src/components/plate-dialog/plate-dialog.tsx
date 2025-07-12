@@ -10,6 +10,7 @@ import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Flame, Target, Heart, ChefHat, Tag } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface PlateDialogProps
   extends React.ComponentPropsWithoutRef<typeof Dialog> {}
@@ -20,7 +21,7 @@ export function PlateDialog({ ...props }: PlateDialogProps) {
 
   return (
     <Dialog open={hasPlateId} onOpenChange={() => setPlateId(null)} {...props}>
-      <DialogContent className="h-[600px] p-0 sm:max-w-[calc(100%-2rem)] xl:max-w-6xl">
+      <DialogContent className="h-[70vh] p-0 sm:max-w-[calc(100%-2rem)] lg:max-h-[600px] xl:max-w-6xl">
         <DialogTitle className="sr-only">Plate {plateId}</DialogTitle>
         {hasPlateId && <Content plateId={plateId} />}
       </DialogContent>
@@ -40,6 +41,18 @@ function Content({ plateId }: { plateId: number }) {
   if (isLoading || !data) {
     return <LoadingOverlay show />;
   }
+
+  // return (
+  //   <div className="grid h-full border border-green-200 lg:grid-cols-2">
+  //     <div className="border border-blue-500">left</div>
+  //     <div className="flex h-[500px] flex-col border border-red-500">
+  //       <p>plate</p>
+  //       <div className="flex-1 overflow-y-scroll">
+  //         <div className="bg-primary h-[700px] w-10"></div>
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
 
   // Mock nutrition data - in a real app, this would come from the AI analysis
   const nutritionData = {
@@ -68,44 +81,21 @@ function Content({ plateId }: { plateId: number }) {
   };
 
   return (
-    <div className="grid h-full border border-green-200 lg:grid-cols-2">
-      <div className="border-border relative col-span-1 bg-gray-100/50 max-lg:border-b lg:border-r">
+    <div className="flex h-full flex-col lg:flex-row">
+      <div className="border-border relative bg-gray-100/50 max-lg:border-b lg:border-r">
         <DottedGrid />
         <div className="relative grid grid-cols-2 gap-4 p-6">
           <div className="flex flex-col gap-4">
-            {/* <PlateImageCard imageUrl={data.imageUrl} /> */}
             <CaloriesCard calories={nutritionData.calories} />
-            <IngredientsCard ingredients={nutritionData.ingredients} />
+            <HealthScoreCard healthScore={nutritionData.healthScore} />
           </div>
           <div className="flex flex-col gap-4">
             <MacrosCard macros={nutritionData.macros} />
-            <HealthScoreCard healthScore={nutritionData.healthScore} />
-            <DietaryTagsCard dietaryTags={nutritionData.dietaryTags} />
           </div>
         </div>
       </div>
-      <Chat plate={data} />
+      <Chat className="flex-1" plate={data} />
     </div>
-  );
-}
-
-interface PlateImageCardProps
-  extends React.ComponentPropsWithoutRef<typeof Card> {
-  imageUrl: string;
-}
-function PlateImageCard({ imageUrl, ...props }: PlateImageCardProps) {
-  return (
-    <Card className="p-4" {...props}>
-      <CardContent className="p-0">
-        <Image
-          src={imageUrl}
-          alt="Plate"
-          width={300}
-          height={300}
-          className="h-auto w-full rounded-md"
-        />
-      </CardContent>
-    </Card>
   );
 }
 
@@ -123,31 +113,6 @@ function CaloriesCard({ calories, ...props }: CaloriesCardProps) {
         </div>
         <div className="text-2xl font-bold">{calories}</div>
         <p className="text-muted-foreground text-sm">kcal</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-interface IngredientsCardProps
-  extends React.ComponentPropsWithoutRef<typeof Card> {
-  ingredients: string[];
-}
-function IngredientsCard({ ingredients, ...props }: IngredientsCardProps) {
-  return (
-    <Card className="p-4" {...props}>
-      <CardContent className="p-0">
-        <div className="mb-3 flex items-center gap-2">
-          <ChefHat className="h-5 w-5 text-indigo-500" />
-          <p className="text-base font-medium">Ingredients</p>
-        </div>
-        <div className="max-h-32 space-y-2 overflow-y-auto">
-          {ingredients.map((ingredient, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <div className="h-2 w-2 flex-shrink-0 rounded-full bg-indigo-400" />
-              <span className="text-sm text-gray-700">{ingredient}</span>
-            </div>
-          ))}
-        </div>
       </CardContent>
     </Card>
   );
@@ -232,6 +197,31 @@ function HealthScoreCard({ healthScore, ...props }: HealthScoreCardProps) {
   );
 }
 
+interface IngredientsCardProps
+  extends React.ComponentPropsWithoutRef<typeof Card> {
+  ingredients: string[];
+}
+function IngredientsCard({ ingredients, ...props }: IngredientsCardProps) {
+  return (
+    <Card className="p-4" {...props}>
+      <CardContent className="p-0">
+        <div className="mb-3 flex items-center gap-2">
+          <ChefHat className="h-5 w-5 text-indigo-500" />
+          <p className="text-base font-medium">Ingredients</p>
+        </div>
+        <div className="max-h-32 space-y-2 overflow-y-auto">
+          {ingredients.map((ingredient, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <div className="h-2 w-2 flex-shrink-0 rounded-full bg-indigo-400" />
+              <span className="text-sm text-gray-700">{ingredient}</span>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 interface DietaryTagsCardProps
   extends React.ComponentPropsWithoutRef<typeof Card> {
   dietaryTags: Array<{
@@ -257,6 +247,26 @@ function DietaryTagsCard({ dietaryTags, ...props }: DietaryTagsCardProps) {
             </span>
           ))}
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface PlateImageCardProps
+  extends React.ComponentPropsWithoutRef<typeof Card> {
+  imageUrl: string;
+}
+function PlateImageCard({ imageUrl, ...props }: PlateImageCardProps) {
+  return (
+    <Card className="p-4" {...props}>
+      <CardContent className="p-0">
+        <Image
+          src={imageUrl}
+          alt="Plate"
+          width={300}
+          height={300}
+          className="h-auto w-full rounded-md"
+        />
       </CardContent>
     </Card>
   );
