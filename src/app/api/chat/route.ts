@@ -9,7 +9,7 @@ import { db } from "@/server/db";
 import { openai } from "@ai-sdk/openai";
 import { streamText, tool } from "ai";
 import type { NextRequest } from "next/server";
-import type { Message } from "ai";
+import type { CoreMessage } from "ai";
 export const maxDuration = 60;
 
 const tools = {
@@ -28,8 +28,7 @@ const tools = {
 export type ToolName = keyof typeof tools;
 
 export async function POST(req: NextRequest) {
-  // Surely the AI SDK should have a type (and guard) for this
-  const body = (await req.json()) as { plateId: number; messages: Message[] };
+  const body = await req.json()
 
   const session = await auth();
 
