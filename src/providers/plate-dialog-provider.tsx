@@ -47,10 +47,10 @@ export function PlateDialogProvider({
     onToolCall({ toolCall }) {
       const name = toolCall.toolName as ToolName;
       switch (name) {
-        case "determineNutritionalInfo":
+        case "saveNutritionalInfo":
           setNutritionalInfo(nutritionalInfoSchema.parse(toolCall.args));
           break;
-        case "determineHealthScore":
+        case "saveHealthScore":
           setHealthScore(healthScoreSchema.parse(toolCall.args));
           break;
 

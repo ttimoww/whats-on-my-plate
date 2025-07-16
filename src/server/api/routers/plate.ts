@@ -9,6 +9,7 @@ export const plateRouter = createTRPCRouter({
 
     return await ctx.db.plate.findMany({
       where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
     });
   }),
   getById: protectedProcedure

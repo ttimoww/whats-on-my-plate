@@ -17,7 +17,7 @@ export function convertFileToBase64(file: File): Promise<string> {
 export function convertBase64ToBuffer(base64String: string): Buffer {
   // Remove the data URL prefix if present (e.g., "data:image/jpeg;base64,")
   const base64Data = base64String.includes(",")
-    ? base64String.split(",")[1] || base64String
+    ? (base64String.split(",")[1] ?? base64String)
     : base64String;
 
   if (!base64Data) {

@@ -4,11 +4,7 @@ import { PlateDialog } from "@/components/plate-dialog/plate-dialog";
 import { auth } from "@/server/auth";
 import Link from "next/link";
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ share?: string }>;
-}) {
+export default async function Home() {
   const session = await auth();
 
   return (

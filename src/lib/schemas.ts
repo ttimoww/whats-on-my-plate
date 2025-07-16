@@ -21,7 +21,11 @@ export const nutritionalInfoSchema = z.object({
 export type NutritionalInfo = z.infer<typeof nutritionalInfoSchema>;
 
 export const healthScoreSchema = z.object({
-  healthScore: z.number().min(0).max(10).describe("The health score of the food"),
+  healthScore: z
+    .number()
+    .min(0)
+    .max(10)
+    .describe("The health score of the food"),
 });
 
 export type HealthScore = z.infer<typeof healthScoreSchema>;

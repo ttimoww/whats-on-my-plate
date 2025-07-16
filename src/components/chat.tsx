@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useChat } from "@ai-sdk/react";
-import { CpuIcon, Loader2, SendIcon } from "lucide-react";
+import { CheckIcon, CpuIcon, Loader2, SendIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import type { Plate } from "@prisma/client";
@@ -17,6 +17,19 @@ import Image from "next/image";
 import { MemoizedMarkdown } from "@/components/memoized-markdown";
 import { usePlateDialog } from "@/providers/plate-dialog-provider";
 import type { ToolName } from "@/app/api/chat/route";
+import { useStickToBottom } from "use-stick-to-bottom";
+import { Badge } from "@/components/ui/badge";
+
+const toolDisplayNames: Record<ToolName, { call: string; result: string }> = {
+  saveNutritionalInfo: {
+    call: "Macro's",
+    result: "Macro's",
+  },
+  saveHealthScore: {
+    call: "Health Score",
+    result: "Health Score",
+  },
+};
 
 interface ChatProps extends React.HTMLAttributes<HTMLDivElement> {
   plate: Plate;
@@ -24,20 +37,21 @@ interface ChatProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Chat({ className, plate, ...props }: ChatProps) {
   const chatStartedRef = useRef(false);
   const { chat } = usePlateDialog();
+  const { scrollRef, contentRef } = useStickToBottom();
 
   const { messages, input, handleInputChange, handleSubmit, reload } = chat;
 
   useEffect(() => {
     if (chatStartedRef.current) return;
     chatStartedRef.current = true;
-    reload();
+    void reload();
   }, [reload]);
 
   return (
     <div className={cn("flex flex-col", className)} {...props}>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto" ref={scrollRef}>
         <div className="max-h-0">
-          <ChatList className="p-6">
+          <ChatList className="p-6" ref={contentRef}>
             <MessageWithPlateImage imageUrl={plate.imageUrl} />
             {messages.map((message) => (
               <Message key={message.id} message={message} />
@@ -124,20 +138,21 @@ function MessagePart({ messagePart, messageId }: MessagePartProps) {
   if (messagePart.type === "tool-invocation") {
     const toolCallId = messagePart.toolInvocation.toolCallId;
 
-    // Other tools
     const toolName = messagePart.toolInvocation.toolName as ToolName;
-    if (messagePart.toolInvocation.state === "call") {
-      return (
-        <p className="bg-muted/70 text-muted-foreground w-fit rounded-full px-2 py-1 text-[10px] font-medium">
-          <Loader2 className="inline size-3 animate-spin" /> {toolName}
-        </p>
-      );
-    }
+    const { state } = messagePart.toolInvocation;
 
     return (
-      <p className="bg-muted/70 text-muted-foreground w-fit rounded-full px-2 py-1 text-[10px] font-medium">
-        <CpuIcon className="inline size-3" /> {toolName}
-      </p>
+      <Badge
+        variant={state === "result" ? "success" : "outline"}
+        className="mr-2 w-fit transition-all"
+      >
+        {state === "result" ? (
+          <CheckIcon className="inline size-3" />
+        ) : (
+          <Loader2 className="inline size-3 animate-spin" />
+        )}{" "}
+        {toolDisplayNames[toolName].result}
+      </Badge>
     );
   }
 }

@@ -72,7 +72,7 @@ const ChatMessage = React.forwardRef<HTMLLIElement, ChatMessageProps>(
         : status === "failed"
           ? "Not sent"
           : "Sending...";
-    const finalStatusText = statusText || defaultStatusText;
+    const finalStatusText = statusText ?? defaultStatusText;
 
     const statusIcon = React.useMemo(() => {
       switch (status) {
